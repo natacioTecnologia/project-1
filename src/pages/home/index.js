@@ -1,28 +1,59 @@
-import { useState } from 'react';
+import P from 'prop-types'
 import './style.css';
-import { useCallback , memo} from 'react';
+import { useReducer ,useContext, createContext} from 'react';
 
-const MyButton = memo( function ({handleCOunter}){
-  console.log("Renderizou")
-  return(
-    <div className='MyButton'>
-      <button onClick={handleCOunter}>Counter </button>
+export const globalState = {
+  title: 'Ola',
+  body: 'body',
+  counter: 0
+}
 
-    </div>
+export const actions =  {
+  SET_TEXT: 'SET_TEXT'
+}
+
+export const reducer = (state, action) => {
+  switch(action.type){
+    case actions.SET_TEXT: {
+      return { ...state, title:action.payload };
+    }
+    default: return {...state}
+  }
+
+}
+
+
+export const Context = createContext(null);
+export const AppContext = ({children}) => {
+  // eslint-disable-next-line no-unused-vars
+  const [state, dispatch] = useReducer(reducer, globalState);
+
+  return (
+    <Context.Provider value={{state}}>{children}</Context.Provider>
   )
-})
+}
+
+AppContext.prototype = {
+  children: P.node,
+}
+
+export const H1 = () =>{
+  const contexto = useContext(Context)
+
+  return (
+    <h1>{contexto.state.title}</h1>
+  )
+};
 
 function Home() {
-  const [counter, setCounter] = useState(0);
 
-  const handleCOunter = useCallback(()  => {
-    setCounter((c)=> c + 1)
-  }, [])
+
   return (
-    <div className="Home">
-      <div>{counter}</div>
-      <MyButton handleCOunter={handleCOunter} />
-    </div>
+    <AppContext>
+      <div className="Home">
+      <H1/>
+      </div>
+    </AppContext>
   );
 }
 
